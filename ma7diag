@@ -1,0 +1,427 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Start-Check Mathematik 7 – Auswertung</title>
+<style>
+:root{
+  --bg:#f4f6f8;
+  --card:#fff;
+  --text:#1f2937;
+  --muted:#667085;
+  --line:#d0d5dd;
+  --green:#166534;
+  --green-bg:#dcfce7;
+  --yellow:#854d0e;
+  --yellow-bg:#fef9c3;
+  --red:#991b1b;
+  --red-bg:#fee2e2;
+  --blue:#1d4ed8;
+  --blue-bg:#dbeafe;
+  --purple:#6b21a8;
+  --purple-bg:#f3e8ff;
+  --dark:#111827;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.45;
+}
+main{max-width:1180px;margin:0 auto;padding:22px}
+header{text-align:center;margin-bottom:20px}
+h1{margin:0;font-size:2rem}
+header p{margin:5px 0;color:var(--muted)}
+.card{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:20px;
+  margin:16px 0;
+  box-shadow:0 2px 8px rgba(0,0,0,.04);
+}
+h2{margin:0 0 10px}
+.input-grid{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:12px;
+}
+.input-box{
+  padding:12px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:#fafafa;
+}
+.input-box label{
+  display:block;
+  font-weight:800;
+  margin-bottom:3px;
+}
+.input-box small{
+  display:block;
+  color:var(--muted);
+  min-height:38px;
+}
+input{
+  width:100%;
+  margin-top:8px;
+  font-size:1.2rem;
+  padding:11px;
+  border:1px solid #98a2b3;
+  border-radius:9px;
+  background:white;
+}
+button{
+  border:0;
+  border-radius:10px;
+  padding:12px 16px;
+  font-weight:800;
+  font-size:1rem;
+  cursor:pointer;
+  margin:14px 8px 0 0;
+}
+.primary{background:var(--dark);color:white}
+.secondary{background:#e5e7eb;color:var(--dark)}
+#error{
+  display:none;
+  margin-top:12px;
+  padding:10px 12px;
+  border-radius:9px;
+  background:var(--red-bg);
+  color:var(--red);
+  font-weight:700;
+}
+.hidden{display:none}
+
+/* Ergebnis-Spalten */
+.result-grid{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:12px;
+  align-items:start;
+}
+.result-col{
+  text-align:center;
+  min-width:0;
+}
+.area-head{
+  font-weight:900;
+  font-size:1.08rem;
+  margin-bottom:7px;
+}
+.area-sub{
+  display:block;
+  color:var(--muted);
+  font-weight:500;
+  font-size:.84rem;
+  min-height:36px;
+}
+.score-box{
+  border-radius:13px;
+  padding:12px 8px;
+  font-size:1.12rem;
+  font-weight:900;
+  border:2px solid transparent;
+}
+.arrow{
+  font-size:2rem;
+  line-height:1.15;
+  font-weight:900;
+  color:#667085;
+  margin:3px 0;
+}
+.rec-box{
+  border-radius:13px;
+  padding:12px 10px;
+  border:1px solid transparent;
+  min-height:190px;
+  text-align:left;
+  font-size:.94rem;
+}
+.rec-box strong{display:block;margin-bottom:5px}
+.green{background:var(--green-bg);color:var(--green);border-color:#86efac}
+.yellow{background:var(--yellow-bg);color:var(--yellow);border-color:#fde047}
+.red{background:var(--red-bg);color:var(--red);border-color:#fca5a5}
+.blue{background:var(--blue-bg);color:var(--blue);border-color:#93c5fd}
+.purple{background:var(--purple-bg);color:var(--purple);border-color:#d8b4fe}
+
+.route{
+  border-left:6px solid var(--dark);
+  background:#f9fafb;
+  border-radius:12px;
+  padding:17px;
+  font-size:1.06rem;
+}
+.route-title{font-size:1.25rem;font-weight:900;margin-bottom:5px}
+.parallel{
+  margin-top:12px;
+  padding:12px;
+  border-radius:10px;
+  background:var(--blue-bg);
+  color:#1e3a8a;
+}
+.note{color:var(--muted);font-size:.92rem}
+.legend{
+  display:flex;gap:10px;flex-wrap:wrap;margin:8px 0 0;
+}
+.legend span{padding:5px 9px;border-radius:8px;font-size:.87rem;font-weight:700}
+@media(max-width:850px){
+  .input-grid{grid-template-columns:1fr 1fr}
+  .result-grid{grid-template-columns:1fr}
+  .result-col{
+    display:grid;
+    grid-template-columns:145px 35px 1fr;
+    gap:7px;
+    align-items:center;
+    text-align:left;
+    border-bottom:1px solid var(--line);
+    padding-bottom:12px;
+  }
+  .area-head{grid-column:1/-1;margin-top:6px}
+  .area-sub{display:inline;min-height:0}
+  .score-box{text-align:center}
+  .arrow{transform:rotate(-90deg);text-align:center}
+  .rec-box{min-height:0}
+}
+@media(max-width:500px){
+  main{padding:12px}
+  .input-grid{grid-template-columns:1fr}
+  .result-col{grid-template-columns:1fr}
+  .arrow{transform:none}
+}
+@media print{
+  body{background:white}
+  main{max-width:none;padding:0}
+  .no-print{display:none!important}
+  .card{box-shadow:none}
+}
+</style>
+</head>
+<body>
+<main>
+<header>
+  <h1>Start-Check Mathematik 7</h1>
+  <p>Dein persönliches Startprofil für „Rechnen mit Brüchen“</p>
+</header>
+
+<section class="card no-print">
+  <h2>1. Trage deine Punkte ein</h2>
+  <p>Übertrage die Punkte aus deinem Start-Check. Es gibt <strong>keine Gesamtpunktzahl</strong>.</p>
+  <div class="input-grid">
+    <div class="input-box">
+      <label for="a">A – Brüche verstehen</label>
+      <small>Bruchvorstellung und Vergleichen</small>
+      <input id="a" type="number" min="0" max="4" step="1" inputmode="numeric" placeholder="0–4">
+    </div>
+    <div class="input-box">
+      <label for="b">B – Erweitern & Kürzen</label>
+      <small>Gleichwertige Brüche</small>
+      <input id="b" type="number" min="0" max="4" step="1" inputmode="numeric" placeholder="0–4">
+    </div>
+    <div class="input-box">
+      <label for="c">C – Addieren & Subtrahieren</label>
+      <small>Wissen aus Klasse 6</small>
+      <input id="c" type="number" min="0" max="4" step="1" inputmode="numeric" placeholder="0–4">
+    </div>
+    <div class="input-box">
+      <label for="d">D – Sicher rechnen</label>
+      <small>Mal, geteilt und Dezimalzahlen</small>
+      <input id="d" type="number" min="0" max="4" step="1" inputmode="numeric" placeholder="0–4">
+    </div>
+    <div class="input-box">
+      <label for="e">E – Startvorteil</label>
+      <small>Ideen zum neuen Kapitel</small>
+      <input id="e" type="number" min="0" max="4" step="1" inputmode="numeric" placeholder="0–4">
+    </div>
+  </div>
+  <div id="error">Bitte trage bei A, B, C, D und E jeweils eine ganze Zahl von 0 bis 4 ein.</div>
+  <button class="primary" onclick="auswerten()">Mein Startprofil anzeigen</button>
+  <button class="secondary" onclick="resetTool()">Zurücksetzen</button>
+</section>
+
+<section id="result" class="card hidden" aria-live="polite">
+  <h2>2. Dein Startprofil</h2>
+  <p>Von oben nach unten lesen: <strong>Punkte → Pfeil → Empfehlung.</strong></p>
+
+  <div class="result-grid">
+    <div class="result-col">
+      <div class="area-head">A<span class="area-sub">Brüche verstehen</span></div>
+      <div id="scoreA" class="score-box"></div>
+      <div class="arrow">↓</div>
+      <div id="recA" class="rec-box"></div>
+    </div>
+
+    <div class="result-col">
+      <div class="area-head">B<span class="area-sub">Erweitern & Kürzen</span></div>
+      <div id="scoreB" class="score-box"></div>
+      <div class="arrow">↓</div>
+      <div id="recB" class="rec-box"></div>
+    </div>
+
+    <div class="result-col">
+      <div class="area-head">C<span class="area-sub">Addieren & Subtrahieren</span></div>
+      <div id="scoreC" class="score-box"></div>
+      <div class="arrow">↓</div>
+      <div id="recC" class="rec-box"></div>
+    </div>
+
+    <div class="result-col">
+      <div class="area-head">D<span class="area-sub">Sicher rechnen</span></div>
+      <div id="scoreD" class="score-box"></div>
+      <div class="arrow">↓</div>
+      <div id="recD" class="rec-box"></div>
+    </div>
+
+    <div class="result-col">
+      <div class="area-head">E<span class="area-sub">Startvorteil</span></div>
+      <div id="scoreE" class="score-box"></div>
+      <div class="arrow">↓</div>
+      <div id="recE" class="rec-box"></div>
+    </div>
+  </div>
+
+  <div class="legend">
+    <span class="green">4 Punkte = sicher</span>
+    <span class="yellow">2–3 Punkte = auffrischen</span>
+    <span class="red">0–1 Punkte = Förderauftrag</span>
+    <span class="blue">E = keine Förderampel</span>
+  </div>
+</section>
+
+<section id="nextCard" class="card hidden">
+  <h2>3. Dein nächster Schritt</h2>
+  <div id="route" class="route"></div>
+  <div id="parallel"></div>
+  <p class="note">
+    Diese Auswertung ist keine Note. Sie hilft dir dabei, den passenden nächsten Lernschritt zu finden.
+  </p>
+  <button class="secondary no-print" onclick="window.print()">Rückmeldung drucken</button>
+</section>
+</main>
+
+<script>
+function getValue(id){
+  const raw=document.getElementById(id).value.trim();
+  if(raw==="") return null;
+  const n=Number(raw);
+  return Number.isInteger(n)&&n>=0&&n<=4?n:null;
+}
+function band(n){
+  if(n===4) return {label:"4 Punkte", cls:"green"};
+  if(n>=2) return {label:"2–3 Punkte", cls:"yellow"};
+  return {label:"0–1 Punkt", cls:"red"};
+}
+function setBox(id,text,cls){
+  const el=document.getElementById(id);
+  el.className=el.className.replace(/\b(green|yellow|red|blue|purple)\b/g,"").trim()+" "+cls;
+  el.innerHTML=text;
+}
+function recommendation(area,n){
+  if(area==="A"){
+    if(n===4) return ["<strong>✓ Sicher</strong>Du hast ein gutes Fundament. Kein Zusatzauftrag.","green"];
+    if(n>=2) return ["<strong>↻ Kurz auffrischen</strong>Bearbeite die kurze Auffrischung „Brüche verstehen“ (5–10 Min.).","yellow"];
+    return ["<strong>! Förderbaustein A</strong>Bearbeite „Brüche verstehen“ (ca. 25–30 Min.) und danach Mini-Check A.","red"];
+  }
+  if(area==="B"){
+    if(n===4) return ["<strong>✓ Sicher</strong>Erweitern und Kürzen sitzen. Kein Zusatzauftrag.","green"];
+    if(n>=2) return ["<strong>↻ Kurz auffrischen</strong>Bearbeite die kurze Auffrischung „Erweitern und Kürzen“ (5–10 Min.).","yellow"];
+    return ["<strong>! Förderbaustein B</strong>Bearbeite „Erweitern und Kürzen“ (ca. 20–25 Min.) und danach Mini-Check B.","red"];
+  }
+  if(area==="C"){
+    if(n===4) return ["<strong>✓ Sicher</strong>Du kannst direkt weiterarbeiten.","green"];
+    if(n>=2) return ["<strong>↻ Kurz auffrischen</strong>Übe Addieren und Subtrahieren kurz parallel zum neuen Kapitel.","yellow"];
+    return ["<strong>! Förderbaustein C</strong>Bearbeite ihn parallel zum neuen Kapitel (ca. 15–20 Min.) und mache Mini-Check C.","red"];
+  }
+  if(area==="D"){
+    if(n===4) return ["<strong>✓ Sicher</strong>Deine Grundrechenarten sind eine gute Grundlage.","green"];
+    if(n>=2) return ["<strong>↻ Kurz auffrischen</strong>Trainiere einzelne Wackelaufgaben kurz weiter.","yellow"];
+    return ["<strong>! Kurztraining D</strong>Trainiere Mal, Geteilt und Dezimalzahlen parallel zum neuen Kapitel (ca. 10–15 Min.).","red"];
+  }
+}
+function eRecommendation(n){
+  if(n<=1) return ["<strong>Du startest mit etwas Neuem.</strong>Das ist völlig in Ordnung. Diese Vorstellungen baust du im neuen Kapitel auf.","blue","0–1 Punkt"];
+  if(n<=3) return ["<strong>Du bringst erste Ideen mit.</strong>Im neuen Lernweg wirst du sie genauer untersuchen und erklären.","blue","2–3 Punkte"];
+  return ["<strong>Du hast einen Startvorteil.</strong>Nimm im Lernweg auch Begründungs- oder Knobelaufgaben.","purple","4 Punkte"];
+}
+
+function auswerten(){
+  const A=getValue("a"), B=getValue("b"), C=getValue("c"), D=getValue("d"), E=getValue("e");
+  if([A,B,C,D,E].some(v=>v===null)){
+    document.getElementById("error").style.display="block";
+    document.getElementById("result").classList.add("hidden");
+    document.getElementById("nextCard").classList.add("hidden");
+    return;
+  }
+  document.getElementById("error").style.display="none";
+
+  [["A",A],["B",B],["C",C],["D",D]].forEach(([area,n])=>{
+    const b=band(n);
+    setBox("score"+area,b.label,b.cls);
+    const rec=recommendation(area,n);
+    setBox("rec"+area,rec[0],rec[1]);
+  });
+
+  const er=eRecommendation(E);
+  setBox("scoreE",er[2],er[1]);
+  setBox("recE",er[0],er[1]);
+
+  const reds=[A,B,C,D].filter(v=>v<=1).length;
+  let title="", body="";
+  let parallels=[];
+
+  if(reds>=3){
+    title="🗣 Lerncoaching";
+    body="Bei dir zeigen mehrere Bereiche Förderbedarf. Du bekommst nicht einfach mehrere Förderpakete hintereinander. Zeige deinen Start-Check deiner Lehrkraft. Ihr entscheidet gemeinsam, womit du beginnst.";
+  } else if(A<=1 && B<=1){
+    title="A zuerst – dann B prüfen";
+    body="Beginne mit <strong>Förderbaustein A „Brüche verstehen“</strong>. Mache danach Mini-Check A. Anschließend entscheidet ihr, welche Teile aus B du noch brauchst.";
+  } else if(A<=1){
+    title="Förderbaustein A zuerst";
+    body="Beginne mit <strong>A „Brüche verstehen“</strong>. Nach Mini-Check A entscheidest du, ob du direkt in das neue Kapitel einsteigen kannst.";
+  } else if(B<=1){
+    title="Förderbaustein B zuerst";
+    body="Beginne mit <strong>B „Erweitern und Kürzen“</strong>. Nach Mini-Check B startest du mit <strong>„Vervielfachen und Teilen von Brüchen“</strong>.";
+  } else {
+    title="✓ Du bist startklar";
+    body="Beginne mit <strong>„Vervielfachen und Teilen von Brüchen“</strong>.";
+  }
+
+  if(reds<3){
+    if(C<=1) parallels.push("C: Förderbaustein „Brüche addieren und subtrahieren“ parallel bearbeiten.");
+    else if(C<=3) parallels.push("C: kurze Auffrischung parallel einplanen.");
+
+    if(D<=1) parallels.push("D: Kurztraining „Sicher rechnen“ parallel bearbeiten.");
+    else if(D<=3) parallels.push("D: einzelne Wackelaufgaben parallel automatisieren.");
+
+    if(A>=2 && A<=3) parallels.push("A: kurze Auffrischung vor oder zu Beginn des Lernwegs.");
+    if(B>=2 && B<=3) parallels.push("B: kurze Auffrischung vor oder zu Beginn des Lernwegs.");
+    if(E===4) parallels.push("E: Im neuen Lernweg eine Begründungs- oder Knobelaufgabe wählen.");
+  }
+
+  document.getElementById("route").innerHTML=
+    `<div class="route-title">${title}</div><div>${body}</div>`;
+
+  if(parallels.length){
+    document.getElementById("parallel").innerHTML=
+      `<div class="parallel"><strong>Zusätzliche Aufträge</strong><ul>${parallels.map(x=>`<li>${x}</li>`).join("")}</ul></div>`;
+  } else {
+    document.getElementById("parallel").innerHTML="";
+  }
+
+  document.getElementById("result").classList.remove("hidden");
+  document.getElementById("nextCard").classList.remove("hidden");
+  document.getElementById("result").scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+function resetTool(){
+  ["a","b","c","d","e"].forEach(id=>document.getElementById(id).value="");
+  document.getElementById("error").style.display="none";
+  document.getElementById("result").classList.add("hidden");
+  document.getElementById("nextCard").classList.add("hidden");
+}
+</script>
+</body>
+</html>
