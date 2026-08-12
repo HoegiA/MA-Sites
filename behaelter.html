@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Brüche teilen – Wie oft passt der kleine Behälter hinein?</title>
+
+  <style>
+    :root {
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #334155;
+      --water: #60a5fa;
+      --water-light: #bfdbfe;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --ok: #166534;
+      --warn: #92400e;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .page {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      text-align: center;
+      font-size: clamp(1.6rem, 3vw, 2.4rem);
+    }
+
+    .lead {
+      text-align: center;
+      margin: 0 auto 18px;
+      max-width: 780px;
+      font-size: 1.08rem;
+      line-height: 1.55;
+    }
+
+    /* Brüche etwas höher in der Textzeile */
+    .frac {
+      display: inline-grid;
+      grid-template-rows: auto auto;
+      align-items: center;
+      justify-items: center;
+      vertical-align: 0.24em;
+      line-height: 0.9;
+      margin: 0 .08em;
+      font-size: 0.92em;
+      min-width: 1.15em;
+    }
+
+    .frac .top {
+      width: 100%;
+      text-align: center;
+      border-bottom: 1.6px solid currentColor;
+      padding: 0 .12em .06em;
+    }
+
+    .frac .bottom {
+      padding: .06em .12em 0;
+      text-align: center;
+    }
+
+    .chooser {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 18px 0 20px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 12px;
+      padding: 12px 18px;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+    }
+
+    .choice {
+      min-width: 110px;
+      background: #e5e7eb;
+      color: #111827;
+      border: 2px solid transparent;
+    }
+
+    .choice.active {
+      background: #dbeafe;
+      border-color: #334155;
+    }
+
+    .scene {
+      background: var(--card);
+      border-radius: 18px;
+      padding: 28px;
+      box-shadow: 0 8px 30px rgba(15, 23, 42, 0.08);
+    }
+
+    .question {
+      margin-top: 2px;
+      text-align: center;
+      font-weight: 700;
+      font-size: clamp(1.15rem, 2.4vw, 1.45rem);
+      line-height: 1.55;
+    }
+
+    .guess-box {
+      margin: 18px auto 4px;
+      max-width: 560px;
+      padding: 16px;
+      border-radius: 14px;
+      background: #f1f5f9;
+      text-align: center;
+    }
+
+    .guess-row {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .guess-row label {
+      font-weight: 700;
+    }
+
+    #guessInput {
+      width: 85px;
+      padding: 10px 12px;
+      border: 2px solid #94a3b8;
+      border-radius: 10px;
+      font: inherit;
+      font-size: 1.08rem;
+      text-align: center;
+      background: white;
+    }
+
+    #guessBtn {
+      background: #334155;
+      color: white;
+    }
+
+    #guessStatus {
+      min-height: 1.5em;
+      margin-top: 9px;
+      color: var(--muted);
+      font-size: .96rem;
+    }
+
+    .hint-row {
+      margin-top: 14px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .hint-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      user-select: none;
+      font-size: .98rem;
+    }
+
+    .hint-label input {
+      width: 18px;
+      height: 18px;
+      accent-color: #334155;
+    }
+
+    .containers {
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      gap: clamp(60px, 11vw, 135px);
+      min-height: 355px;
+      position: relative;
+      overflow: visible;
+      margin-top: 10px;
+    }
+
+    .container-block {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .label {
+      font-weight: 700;
+      font-size: 1.1rem;
+      text-align: center;
+    }
+
+    .sub {
+      color: var(--muted);
+      font-size: 0.96rem;
+      text-align: center;
+      line-height: 1.45;
+    }
+
+    .vessel {
+      position: relative;
+      overflow: hidden;
+      border: 4px solid var(--border);
+      border-top-width: 2px;
+      border-radius: 0 0 20px 20px;
+      background: #fff;
+    }
+
+    .big {
+      width: 220px;
+      height: 280px;
+    }
+
+    .small {
+      width: 105px;
+      height: 95px;
+      transform-origin: 10% 85%;
+      transition:
+        transform 650ms ease,
+        height 350ms ease,
+        width 350ms ease;
+    }
+
+    .small.pour {
+      transform: translate(-78px, -92px) rotate(-72deg);
+    }
+
+    .water {
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 100%;
+      height: 0%;
+      background: linear-gradient(to top, var(--water), var(--water-light));
+      transition: height 700ms ease;
+      z-index: 1;
+    }
+
+    .small .water {
+      height: 100%;
+      transition: height 420ms ease;
+    }
+
+    .small.empty .water {
+      height: 0%;
+    }
+
+    #guides {
+      position: absolute;
+      inset: 0;
+      z-index: 3;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 180ms ease;
+    }
+
+    #guides.show {
+      opacity: 1;
+    }
+
+    .guide {
+      position: absolute;
+      left: 7px;
+      right: 7px;
+      border-top: 2px dashed rgba(51,65,85,.4);
+    }
+
+    .count-row {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 22px;
+      min-height: 34px;
+    }
+
+    .count-number {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      background: #dbeafe;
+      border: 2px solid var(--border);
+      opacity: 0;
+      transform: scale(.7);
+      transition: opacity 260ms ease, transform 260ms ease;
+    }
+
+    .count-number.show {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    #startBtn {
+      background: #111827;
+      color: white;
+    }
+
+    #resetBtn {
+      background: #e5e7eb;
+      color: #111827;
+    }
+
+    .result {
+      margin: 22px auto 0;
+      max-width: 680px;
+      padding: 16px 18px;
+      border-radius: 14px;
+      background: #eff6ff;
+      text-align: center;
+      font-size: 1.16rem;
+      display: none;
+      line-height: 1.55;
+    }
+
+    .result.show {
+      display: block;
+    }
+
+    .result .correct {
+      color: var(--ok);
+      font-weight: 800;
+    }
+
+    .result .incorrect {
+      color: var(--warn);
+      font-weight: 800;
+    }
+
+    .equation {
+      display: inline-flex;
+      align-items: center;
+      gap: .35em;
+      margin-top: .5em;
+      font-size: 1.25em;
+      font-weight: 700;
+      line-height: 1.35;
+    }
+
+    @media (max-width: 650px) {
+      .page { padding: 14px; }
+      .scene { padding: 20px 12px; }
+
+      .containers {
+        gap: 40px;
+        min-height: 310px;
+      }
+
+      .big {
+        width: 165px;
+        height: 230px;
+      }
+
+      .small {
+        width: 84px;
+      }
+
+      .small.pour {
+        transform: translate(-48px, -70px) rotate(-70deg);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="page">
+    <h1>Wie oft passt der kleine Behälter hinein?</h1>
+
+    <p class="lead">
+      Der große Behälter fasst
+      <strong><span class="frac"><span class="top">3</span><span class="bottom">4</span></span> l</strong>.
+      Wähle einen kleinen Behälter. Gib zuerst deine Vermutung ab und überprüfe sie anschließend.
+    </p>
+
+    <div class="chooser" aria-label="Kleinen Behälter auswählen">
+      <button class="choice active" data-num="1" data-den="4">
+        <span class="frac"><span class="top">1</span><span class="bottom">4</span></span> l
+      </button>
+
+      <button class="choice" data-num="1" data-den="8">
+        <span class="frac"><span class="top">1</span><span class="bottom">8</span></span> l
+      </button>
+
+      <button class="choice" data-num="3" data-den="8">
+        <span class="frac"><span class="top">3</span><span class="bottom">8</span></span> l
+      </button>
+    </div>
+
+    <section class="scene">
+      <div class="question" id="question"></div>
+
+      <div class="guess-box">
+        <div class="guess-row">
+          <label for="guessInput">Meine Vermutung:</label>
+          <input
+            id="guessInput"
+            type="number"
+            min="1"
+            step="1"
+            inputmode="numeric"
+            aria-label="Vermutete Anzahl"
+          />
+          <span>mal</span>
+          <button id="guessBtn">Vermutung speichern</button>
+        </div>
+
+        <div id="guessStatus">
+          Gib zuerst eine ganze Zahl ein.
+        </div>
+
+        <div class="hint-row">
+          <label class="hint-label">
+            <input type="checkbox" id="hintToggle" />
+            Tipp: Einteilung im großen Behälter anzeigen
+          </label>
+        </div>
+      </div>
+
+      <div class="containers">
+        <div class="container-block">
+          <div class="label">Großer Behälter</div>
+          <div class="sub">
+            Fassungsvermögen:
+            <span class="frac"><span class="top">3</span><span class="bottom">4</span></span> l
+          </div>
+
+          <div class="vessel big" aria-label="Großer Behälter mit 3/4 Liter Fassungsvermögen">
+            <div class="water" id="bigWater"></div>
+            <div id="guides"></div>
+          </div>
+        </div>
+
+        <div class="container-block">
+          <div class="label">Kleiner Behälter</div>
+          <div class="sub" id="smallLabel"></div>
+
+          <div class="vessel small" id="smallCup" aria-label="Kleiner Behälter">
+            <div class="water"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="count-row" id="countRow" aria-live="polite"></div>
+
+      <div class="controls">
+        <button id="startBtn" disabled>Eingießen starten</button>
+        <button id="resetBtn">Neu starten</button>
+      </div>
+
+      <div class="result" id="result"></div>
+    </section>
+  </main>
+
+  <script>
+    const BIG_NUM = 3;
+    const BIG_DEN = 4;
+
+    const bigWater = document.getElementById("bigWater");
+    const smallCup = document.getElementById("smallCup");
+    const result = document.getElementById("result");
+    const startBtn = document.getElementById("startBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const question = document.getElementById("question");
+    const smallLabel = document.getElementById("smallLabel");
+    const countRow = document.getElementById("countRow");
+    const guides = document.getElementById("guides");
+
+    const guessInput = document.getElementById("guessInput");
+    const guessBtn = document.getElementById("guessBtn");
+    const guessStatus = document.getElementById("guessStatus");
+    const hintToggle = document.getElementById("hintToggle");
+
+    const choiceButtons = [...document.querySelectorAll(".choice")];
+
+    let smallNum = 1;
+    let smallDen = 4;
+    let totalPours = 3;
+    let pours = 0;
+    let busy = false;
+    let guess = null;
+    let guessLocked = false;
+
+    function fractionHTML(num, den) {
+      return `<span class="frac"><span class="top">${num}</span><span class="bottom">${den}</span></span>`;
+    }
+
+    function computeTotalPours(num, den) {
+      return (BIG_NUM * den) / (BIG_DEN * num);
+    }
+
+    function setCupSize(num, den) {
+      const fractionOfBig = (num / den) / (BIG_NUM / BIG_DEN);
+      const h = Math.max(58, Math.min(125, 52 + 80 * fractionOfBig));
+      const w = Math.max(78, Math.min(112, 72 + 42 * fractionOfBig));
+
+      smallCup.style.height = `${h}px`;
+      smallCup.style.width = `${w}px`;
+    }
+
+    function buildCountNumbers() {
+      countRow.innerHTML = "";
+
+      for (let i = 1; i <= totalPours; i++) {
+        const n = document.createElement("div");
+        n.className = "count-number";
+        n.id = `count${i}`;
+        n.textContent = i;
+        countRow.appendChild(n);
+      }
+    }
+
+    function revealCountNumber(i) {
+      const item = document.getElementById(`count${i}`);
+      if (item) item.classList.add("show");
+    }
+
+    function buildGuides() {
+      guides.innerHTML = "";
+
+      for (let i = 1; i < totalPours; i++) {
+        const line = document.createElement("div");
+        line.className = "guide";
+        line.style.bottom = `${(i / totalPours) * 100}%`;
+        guides.appendChild(line);
+      }
+    }
+
+    function updateGuideVisibility() {
+      guides.classList.toggle("show", hintToggle.checked);
+    }
+
+    function refreshTexts() {
+      const small = fractionHTML(smallNum, smallDen);
+
+      question.innerHTML =
+        `Wie oft passt ${small} l in ${fractionHTML(3,4)} l?`;
+
+      smallLabel.innerHTML =
+        `Inhalt: ${small} l`;
+    }
+
+    function resetGuess() {
+      guess = null;
+      guessLocked = false;
+
+      guessInput.value = "";
+      guessInput.disabled = false;
+      guessBtn.disabled = false;
+
+      guessStatus.textContent = "Gib zuerst eine ganze Zahl ein.";
+      startBtn.disabled = true;
+    }
+
+    function saveGuess() {
+      if (busy || guessLocked) return;
+
+      const value = Number(guessInput.value);
+
+      if (!Number.isInteger(value) || value < 1) {
+        guessStatus.textContent = "Bitte gib eine ganze Zahl größer als 0 ein.";
+        guessInput.focus();
+        return;
+      }
+
+      guess = value;
+      guessLocked = true;
+
+      guessInput.disabled = true;
+      guessBtn.disabled = true;
+
+      guessStatus.textContent =
+        `Deine Vermutung ist gespeichert: ${guess}-mal. Jetzt kannst du sie überprüfen.`;
+
+      startBtn.disabled = false;
+    }
+
+    function chooseContainer(num, den) {
+      if (busy) return;
+
+      smallNum = num;
+      smallDen = den;
+      totalPours = computeTotalPours(num, den);
+
+      if (!Number.isInteger(totalPours)) {
+        throw new Error("Dieser Behälter würde einen Rest erzeugen.");
+      }
+
+      choiceButtons.forEach(btn => {
+        btn.classList.toggle(
+          "active",
+          Number(btn.dataset.num) === num &&
+          Number(btn.dataset.den) === den
+        );
+      });
+
+      setCupSize(num, den);
+      buildCountNumbers();
+      buildGuides();
+      refreshTexts();
+      resetActivity();
+      resetGuess();
+      updateGuideVisibility();
+    }
+
+    async function animateSinglePour(stepNumber) {
+      smallCup.classList.add("pour");
+      await wait(500);
+
+      smallCup.classList.add("empty");
+      bigWater.style.height = `${(stepNumber / totalPours) * 100}%`;
+
+      await wait(760);
+
+      smallCup.classList.remove("pour");
+      revealCountNumber(stepNumber);
+
+      await wait(420);
+
+      if (stepNumber < totalPours) {
+        smallCup.classList.remove("empty");
+        await wait(350);
+      }
+    }
+
+    async function startPourSequence() {
+      if (busy || !guessLocked) return;
+
+      busy = true;
+      startBtn.disabled = true;
+      guessBtn.disabled = true;
+      guessInput.disabled = true;
+
+      for (let step = 1; step <= totalPours; step++) {
+        pours = step;
+        await animateSinglePour(step);
+      }
+
+      showResult();
+      busy = false;
+    }
+
+    function showResult() {
+      const small = fractionHTML(smallNum, smallDen);
+      const guessWasCorrect = guess === totalPours;
+
+      const feedback = guessWasCorrect
+        ? `<div class="correct">Deine Vermutung war richtig.</div>`
+        : `<div class="incorrect">Deine Vermutung war ${guess}-mal. Tatsächlich passt der Behälter ${totalPours}-mal hinein.</div>`;
+
+      result.innerHTML = `
+        ${feedback}
+        <div style="margin-top:10px;">
+          Der ${small}-Liter-Behälter passt
+          <strong>${totalPours}-mal</strong>
+          in ${fractionHTML(3,4)} Liter.
+        </div>
+
+        <div class="equation">
+          ${fractionHTML(3,4)}
+          <span>:</span>
+          ${small}
+          <span>=</span>
+          <span>${totalPours}</span>
+        </div>
+      `;
+
+      result.classList.add("show");
+    }
+
+    function resetActivity() {
+      pours = 0;
+      busy = false;
+
+      bigWater.style.height = "0%";
+      smallCup.classList.remove("pour", "empty");
+
+      result.classList.remove("show");
+
+      [...countRow.children].forEach(el => el.classList.remove("show"));
+    }
+
+    function fullReset() {
+      resetActivity();
+      resetGuess();
+      hintToggle.checked = false;
+      updateGuideVisibility();
+    }
+
+    function wait(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    choiceButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        chooseContainer(
+          Number(btn.dataset.num),
+          Number(btn.dataset.den)
+        );
+      });
+    });
+
+    guessBtn.addEventListener("click", saveGuess);
+
+    guessInput.addEventListener("keydown", event => {
+      if (event.key === "Enter") {
+        saveGuess();
+      }
+    });
+
+    hintToggle.addEventListener("change", updateGuideVisibility);
+
+    startBtn.addEventListener("click", startPourSequence);
+    resetBtn.addEventListener("click", fullReset);
+
+    chooseContainer(1, 4);
+  </script>
+</body>
+</html>
