@@ -1,0 +1,808 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'sha256-nv8+cUY0Pob5Q3M/ZpXwtpy5BhZBYRfpwxzb4B7mWcY='; script-src 'sha256-jN6ahM5FMZIdj8EJ3BntYmuuRv+G7h6fDjaG8Dtzu9s='; img-src 'none'; font-src 'none'; connect-src 'none'; object-src 'none'; media-src 'none'; frame-src 'none'; worker-src 'none'; manifest-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta name="referrer" content="no-referrer">
+  <title>Tastentraining – Schulversion</title>
+  <style>
+    :root {
+      --bg: #f6f7f9;
+      --card: #ffffff;
+      --text: #1d2430;
+      --muted: #5f6875;
+      --border: #d9dee5;
+      --accent: #315ea8;
+      --accent-soft: #eaf1fb;
+      --ok: #176b3a;
+      --ok-soft: #eaf7ef;
+      --warn: #8a4b08;
+      --warn-soft: #fff4e5;
+      --shadow: 0 8px 24px rgba(0,0,0,.08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    main {
+      width: min(930px, calc(100% - 32px));
+      margin: 32px auto;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(1.8rem, 3vw, 2.6rem);
+    }
+
+    .subtitle {
+      margin: 0 0 24px;
+      color: var(--muted);
+      font-size: 1.05rem;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    button {
+      font: inherit;
+      cursor: pointer;
+    }
+
+    .tab, .secondary {
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      border-radius: 12px;
+      padding: 10px 16px;
+    }
+
+    .tab.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 22px;
+      box-shadow: var(--shadow);
+    }
+
+    .hidden { display: none !important; }
+
+    .instruction {
+      margin-top: 0;
+      font-size: 1.1rem;
+    }
+
+    .keys {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin: 22px 0;
+    }
+
+    .key {
+      min-height: 88px;
+      border: 2px solid var(--border);
+      border-bottom-width: 6px;
+      border-radius: 14px;
+      background: #fafbfc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 12px;
+      font-weight: 700;
+      font-size: 1.15rem;
+      transition: .15s ease;
+    }
+
+    .key.active {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+      transform: translateY(2px);
+    }
+
+    .feedback {
+      min-height: 136px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px;
+      background: #fbfcfd;
+    }
+
+    .feedback.ok {
+      border-color: #b8ddc7;
+      background: var(--ok-soft);
+    }
+
+    .feedback.warn {
+      border-color: #f0cf9a;
+      background: var(--warn-soft);
+    }
+
+    .feedback h2 {
+      margin: 0 0 8px;
+      font-size: 1.35rem;
+    }
+
+    .feedback p {
+      margin: 6px 0;
+      line-height: 1.45;
+    }
+
+    .example {
+      color: var(--muted);
+    }
+
+    .question {
+      font-size: clamp(1.25rem, 2.4vw, 1.7rem);
+      line-height: 1.35;
+      margin: 8px 0 18px;
+    }
+
+    .progress {
+      margin-top: 14px;
+      color: var(--muted);
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+
+    .primary {
+      border: 1px solid var(--accent);
+      background: var(--accent);
+      color: white;
+      border-radius: 12px;
+      padding: 10px 16px;
+    }
+
+    .primary:disabled {
+      cursor: not-allowed;
+      opacity: .45;
+    }
+
+    .tip {
+      margin-top: 20px;
+      padding: 14px 16px;
+      border-left: 4px solid var(--accent);
+      background: var(--accent-soft);
+      border-radius: 8px;
+      line-height: 1.45;
+    }
+
+    .practice-box {
+      margin: 18px 0;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px;
+      background: #fbfcfd;
+    }
+
+    .practice-label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 700;
+    }
+
+    textarea.practice {
+      width: 100%;
+      min-height: 120px;
+      resize: vertical;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      background: white;
+      color: var(--text);
+      padding: 14px;
+      font: 1.15rem/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+
+    textarea.practice:focus {
+      outline: 3px solid var(--accent-soft);
+      border-color: var(--accent);
+    }
+
+    .task-number {
+      display: inline-flex;
+      width: 2rem;
+      height: 2rem;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      background: var(--accent);
+      color: white;
+      font-weight: 700;
+      margin-right: 8px;
+    }
+
+    .keyboard-wrap {
+      margin-top: 28px;
+    }
+
+    .keyboard-wrap h2 {
+      font-size: 1.25rem;
+      margin-bottom: 8px;
+    }
+
+    .keyboard-note {
+      color: var(--muted);
+      margin-top: 0;
+    }
+
+    .keyboard {
+      display: grid;
+      gap: 6px;
+      padding: 14px;
+      background: #e9edf2;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      overflow: hidden;
+    }
+
+    .kb-row {
+      display: flex;
+      gap: 6px;
+    }
+
+    .kb {
+      flex: 1 1 0;
+      min-width: 0;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid #b9c0ca;
+      border-bottom-width: 4px;
+      border-radius: 7px;
+      background: #fff;
+      color: #26303c;
+      font-size: .82rem;
+      font-weight: 650;
+      user-select: none;
+      transition: .12s ease;
+    }
+
+    .kb.wide-15 { flex: 1.5 1 0; }
+    .kb.wide-18 { flex: 1.8 1 0; }
+    .kb.wide-22 { flex: 2.2 1 0; }
+    .kb.space { flex: 6 1 0; }
+
+    .kb.special {
+      background: var(--accent-soft);
+      border-color: #9fb8df;
+    }
+
+    .kb.pressed {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+      transform: translateY(2px);
+      border-bottom-width: 2px;
+    }
+
+    @media (max-width: 680px) {
+      main { width: min(100% - 18px, 930px); margin: 18px auto; }
+      .panel { padding: 16px; }
+      .keys { grid-template-columns: 1fr; }
+      .kb { min-height: 36px; font-size: .65rem; }
+      .keyboard { padding: 8px; gap: 4px; }
+      .kb-row { gap: 4px; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Tastentraining</h1>
+    <p class="subtitle">Lerne vier wichtige Tasten kennen, erkenne ihre Bedeutung und benutze sie selbst.</p>
+
+    <div class="tabs" aria-label="Modus wählen">
+      <button id="discoverTab" class="tab active" type="button" aria-pressed="true">1. Entdecken</button>
+      <button id="quizTab" class="tab" type="button" aria-pressed="false">2. Bedeutung üben</button>
+      <button id="applyTab" class="tab" type="button" aria-pressed="false">3. Anwenden</button>
+    </div>
+
+    <section id="discoverPanel" class="panel">
+      <p class="instruction"><strong>Drücke eine der vier Tasten auf deiner Tastatur.</strong> Danach erfährst du, wofür sie da ist.</p>
+
+      <div class="keys" aria-hidden="true">
+        <div id="key-space" class="key">Leertaste</div>
+        <div id="key-enter" class="key">Enter ↵</div>
+        <div id="key-backspace" class="key">⌫ Rücktaste</div>
+        <div id="key-shift" class="key">⇧ Shift</div>
+      </div>
+
+      <div id="discoverFeedback" class="feedback" aria-live="polite">
+        <h2>Bereit?</h2>
+        <p>Drücke <strong>Leertaste</strong>, <strong>Enter</strong>, <strong>Rücktaste</strong> oder <strong>Shift</strong>.</p>
+      </div>
+    </section>
+
+    <section id="quizPanel" class="panel hidden">
+      <p class="instruction"><strong>Welche Taste passt?</strong></p>
+      <div id="question" class="question"></div>
+
+      <div id="quizFeedback" class="feedback" aria-live="polite">
+        <h2>Drücke die passende Taste.</h2>
+        <p>Geschwindigkeit ist nicht wichtig. Finde die Taste in Ruhe.</p>
+      </div>
+
+      <div class="actions">
+        <button id="nextButton" class="primary" type="button" disabled>Nächste Aufgabe</button>
+        <button id="resetButton" class="secondary" type="button">Neu starten</button>
+      </div>
+
+      <p id="progress" class="progress"></p>
+    </section>
+
+    <section id="applyPanel" class="panel hidden">
+      <p class="instruction"><strong>Jetzt benutzt du die Tasten wirklich.</strong> Bearbeite die Aufgaben nacheinander.</p>
+
+      <div class="practice-box">
+        <div class="question">
+          <span class="task-number" id="applyNumber">1</span>
+          <span id="applyQuestion">Zwischen den beiden Wörtern fehlt ein Abstand. Drücke die Leertaste.</span>
+        </div>
+
+        <label class="practice-label" for="practiceArea">Dein Arbeitsfeld</label>
+        <textarea id="practiceArea" class="practice" spellcheck="false" autocomplete="off"></textarea>
+
+        <div id="applyFeedback" class="feedback" aria-live="polite">
+          <h2>Los geht's.</h2>
+          <p>Die Schreibmarke steht schon an der richtigen Stelle. Benutze jetzt die passende Taste.</p>
+        </div>
+
+        <div class="actions">
+          <button id="applyNextButton" class="primary" type="button" disabled>Nächste Aufgabe</button>
+          <button id="applyResetButton" class="secondary" type="button">Aufgabe neu starten</button>
+        </div>
+
+        <p id="applyProgress" class="progress"></p>
+      </div>
+    </section>
+
+    <div class="tip">
+      <strong>Tipp:</strong> Wenn du eine Taste nicht findest, schau zuerst genau auf deine Tastatur. Probiere erst danach Hilfe zu holen.
+    </div>
+
+    <section class="keyboard-wrap" aria-labelledby="keyboardTitle">
+      <h2 id="keyboardTitle">So sieht eine QWERTZ-Tastatur ungefähr aus</h2>
+      <p class="keyboard-note">Die vier Tasten aus dem Training sind markiert. Wenn du eine davon drückst, leuchtet sie hier kurz auf.</p>
+
+      <div class="keyboard" aria-label="Vereinfachte Darstellung einer deutschen QWERTZ-Tastatur">
+        <div class="kb-row">
+          <div class="kb">Esc</div><div class="kb">1</div><div class="kb">2</div><div class="kb">3</div><div class="kb">4</div>
+          <div class="kb">5</div><div class="kb">6</div><div class="kb">7</div><div class="kb">8</div><div class="kb">9</div>
+          <div class="kb">0</div><div id="kbBackspace" class="kb wide-18 special">⌫ Rücktaste</div>
+        </div>
+        <div class="kb-row">
+          <div class="kb wide-15">Tab</div><div class="kb">Q</div><div class="kb">W</div><div class="kb">E</div><div class="kb">R</div>
+          <div class="kb">T</div><div class="kb">Z</div><div class="kb">U</div><div class="kb">I</div><div class="kb">O</div>
+          <div class="kb">P</div><div id="kbEnterTop" class="kb wide-15 special">Enter ↵</div>
+        </div>
+        <div class="kb-row">
+          <div class="kb wide-18">Feststell</div><div class="kb">A</div><div class="kb">S</div><div class="kb">D</div><div class="kb">F</div>
+          <div class="kb">G</div><div class="kb">H</div><div class="kb">J</div><div class="kb">K</div><div class="kb">L</div>
+          <div class="kb">Ö</div><div class="kb">Ä</div><div id="kbEnter" class="kb wide-15 special">↵</div>
+        </div>
+        <div class="kb-row">
+          <div id="kbShiftLeft" class="kb wide-22 special">⇧ Shift</div><div class="kb">Y</div><div class="kb">X</div><div class="kb">C</div>
+          <div class="kb">V</div><div class="kb">B</div><div class="kb">N</div><div class="kb">M</div><div class="kb">,</div><div class="kb">.</div>
+          <div id="kbShiftRight" class="kb wide-22 special">Shift ⇧</div>
+        </div>
+        <div class="kb-row">
+          <div class="kb wide-15">Strg</div><div class="kb wide-15">Alt</div>
+          <div id="kbSpace" class="kb space special">Leertaste</div>
+          <div class="kb wide-15">Alt Gr</div><div class="kb wide-15">Strg</div>
+        </div>
+      </div>
+    </section>
+
+    <p class="subtitle" aria-label="Sicherheitshinweis">
+      Offline-Schulversion · keine externen Skripte · keine Netzwerkverbindungen
+    </p>
+  </main>
+
+  <script>
+    const keyInfo = {
+      Space: {
+        name: "Leertaste",
+        elementId: "key-space",
+        explanation: "Die Leertaste macht einen Abstand zwischen zwei Wörtern.",
+        example: "Beispiel: Aus „HalloWelt“ wird „Hallo Welt“."
+      },
+      Enter: {
+        name: "Enter-Taste",
+        elementId: "key-enter",
+        explanation: "Mit Enter bestätigst du oft eine Eingabe. Beim Schreiben beginnst du damit eine neue Zeile oder einen neuen Absatz.",
+        example: "Beispiel: Nach einer Überschrift kannst du Enter drücken und in der nächsten Zeile weiterschreiben."
+      },
+      Backspace: {
+        name: "Rücktaste",
+        elementId: "key-backspace",
+        explanation: "Die Rücktaste löscht das Zeichen links von der Schreibmarke.",
+        example: "Beispiel: Wenn du „Halloo“ geschrieben hast, kannst du das letzte „o“ damit löschen."
+      },
+      Shift: {
+        name: "Shift-Taste / Umschalttaste",
+        elementId: "key-shift",
+        explanation: "Halte Shift gedrückt und drücke gleichzeitig einen Buchstaben. Dann wird der Buchstabe groß geschrieben.",
+        example: "Beispiel: Shift + a ergibt A."
+      }
+    };
+
+    const questions = [
+      { code: "Space", text: "Mit welcher Taste machst du einen Abstand zwischen zwei Wörtern?" },
+      { code: "Backspace", text: "Mit welcher Taste löschst du das Zeichen links von der Schreibmarke?" },
+      { code: "Enter", text: "Mit welcher Taste bestätigst du häufig eine Eingabe oder beginnst beim Schreiben eine neue Zeile?" },
+      { code: "Shift", text: "Welche Taste hältst du gedrückt, wenn du einen Großbuchstaben schreiben möchtest?" }
+    ];
+
+    const applyTasks = [
+      {
+        question: "Zwischen den beiden Wörtern fehlt ein Abstand. Drücke die Leertaste.",
+        startText: "HalloWelt",
+        caret: 5,
+        expected: "space",
+        successText: "Super! Die Leertaste hat einen Abstand zwischen den Wörtern erzeugt."
+      },
+      {
+        question: "Mache nach dem Wort „Hallo“ einen neuen Absatz. Drücke Enter.",
+        startText: "HalloWelt",
+        caret: 5,
+        expected: "enter",
+        successText: "Richtig! Mit Enter hast du eine neue Zeile begonnen."
+      },
+      {
+        question: "Lösche das Wort „rot“ vollständig mit der Rücktaste.",
+        startText: "Mein Ball ist rot",
+        caret: 16,
+        expected: "deleteWord",
+        successText: "Geschafft! Mit der Rücktaste hast du das Wort gelöscht."
+      },
+      {
+        question: "Schreibe einen großen Buchstaben A. Halte dazu Shift gedrückt und drücke A.",
+        startText: "",
+        caret: 0,
+        expected: "uppercaseA",
+        successText: "Richtig! Mit Shift + A hast du einen Großbuchstaben geschrieben."
+      }
+    ];
+
+    const discoverTab = document.getElementById("discoverTab");
+    const quizTab = document.getElementById("quizTab");
+    const applyTab = document.getElementById("applyTab");
+    const discoverPanel = document.getElementById("discoverPanel");
+    const quizPanel = document.getElementById("quizPanel");
+    const applyPanel = document.getElementById("applyPanel");
+
+    const discoverFeedback = document.getElementById("discoverFeedback");
+    const questionEl = document.getElementById("question");
+    const quizFeedback = document.getElementById("quizFeedback");
+    const nextButton = document.getElementById("nextButton");
+    const resetButton = document.getElementById("resetButton");
+    const progressEl = document.getElementById("progress");
+
+    const practiceArea = document.getElementById("practiceArea");
+    const applyQuestion = document.getElementById("applyQuestion");
+    const applyFeedback = document.getElementById("applyFeedback");
+    const applyNextButton = document.getElementById("applyNextButton");
+    const applyResetButton = document.getElementById("applyResetButton");
+    const applyProgress = document.getElementById("applyProgress");
+    const applyNumber = document.getElementById("applyNumber");
+
+    let mode = "discover";
+    let order = [];
+    let current = 0;
+    let correct = 0;
+    let answered = false;
+
+    let applyCurrent = 0;
+    let applyDone = false;
+    let backspaceCount = 0;
+
+    function normalizeCode(event) {
+      if (event.code === "Space") return "Space";
+      if (event.key === "Enter") return "Enter";
+      if (event.key === "Backspace") return "Backspace";
+      if (event.key === "Shift") return "Shift";
+      return null;
+    }
+
+    function flashKeyboard(code) {
+      const ids = {
+        Space: ["kbSpace"],
+        Enter: ["kbEnterTop", "kbEnter"],
+        Backspace: ["kbBackspace"],
+        Shift: ["kbShiftLeft", "kbShiftRight"]
+      }[code];
+
+      if (!ids) return;
+
+      ids.forEach(id => document.getElementById(id)?.classList.add("pressed"));
+      setTimeout(() => {
+        ids.forEach(id => document.getElementById(id)?.classList.remove("pressed"));
+      }, 220);
+    }
+
+    function clearHighlights() {
+      Object.values(keyInfo).forEach(info => {
+        document.getElementById(info.elementId).classList.remove("active");
+      });
+    }
+
+    function setMode(newMode) {
+      mode = newMode;
+
+      const isDiscover = mode === "discover";
+      const isQuiz = mode === "quiz";
+      const isApply = mode === "apply";
+
+      discoverTab.classList.toggle("active", isDiscover);
+      quizTab.classList.toggle("active", isQuiz);
+      applyTab.classList.toggle("active", isApply);
+
+      discoverTab.setAttribute("aria-pressed", isDiscover ? "true" : "false");
+      quizTab.setAttribute("aria-pressed", isQuiz ? "true" : "false");
+      applyTab.setAttribute("aria-pressed", isApply ? "true" : "false");
+
+      discoverPanel.classList.toggle("hidden", !isDiscover);
+      quizPanel.classList.toggle("hidden", !isQuiz);
+      applyPanel.classList.toggle("hidden", !isApply);
+
+      clearHighlights();
+
+      if (isQuiz) startQuiz();
+      if (isApply) startApply();
+    }
+
+    function showDiscovery(code) {
+      const info = keyInfo[code];
+      if (!info) return;
+
+      clearHighlights();
+      document.getElementById(info.elementId).classList.add("active");
+
+      discoverFeedback.className = "feedback ok";
+      discoverFeedback.innerHTML = `
+        <h2>Das ist die ${info.name}.</h2>
+        <p>${info.explanation}</p>
+        <p class="example">${info.example}</p>
+      `;
+    }
+
+    function shuffledQuestions() {
+      return [...questions].sort(() => Math.random() - 0.5);
+    }
+
+    function startQuiz() {
+      order = shuffledQuestions();
+      current = 0;
+      correct = 0;
+      answered = false;
+      nextButton.disabled = true;
+      renderQuestion();
+    }
+
+    function renderQuestion() {
+      if (current >= order.length) {
+        questionEl.textContent = "Geschafft!";
+        quizFeedback.className = "feedback ok";
+        quizFeedback.innerHTML = `
+          <h2>Training beendet</h2>
+          <p>Du hast ${correct} von ${order.length} Aufgaben richtig gelöst.</p>
+          <p>Wenn du noch unsicher bist, kannst du das Training einfach neu starten.</p>
+        `;
+        nextButton.disabled = true;
+        progressEl.textContent = `Ergebnis: ${correct} von ${order.length}`;
+        return;
+      }
+
+      answered = false;
+      nextButton.disabled = true;
+      questionEl.textContent = order[current].text;
+      quizFeedback.className = "feedback";
+      quizFeedback.innerHTML = `
+        <h2>Drücke die passende Taste.</h2>
+        <p>Du darfst so lange probieren, bis du sie gefunden hast.</p>
+      `;
+      progressEl.textContent = `Aufgabe ${current + 1} von ${order.length}`;
+    }
+
+    function checkAnswer(code) {
+      if (answered || current >= order.length) return;
+
+      const expected = order[current].code;
+      const pressed = keyInfo[code];
+
+      if (code === expected) {
+        answered = true;
+        correct++;
+        const info = keyInfo[expected];
+        quizFeedback.className = "feedback ok";
+        quizFeedback.innerHTML = `
+          <h2>✓ Richtig: ${info.name}</h2>
+          <p>${info.explanation}</p>
+        `;
+        nextButton.disabled = false;
+      } else {
+        quizFeedback.className = "feedback warn";
+        quizFeedback.innerHTML = `
+          <h2>Noch nicht.</h2>
+          <p>Du hast <strong>${pressed.name}</strong> gedrückt.</p>
+          <p>Lies die Frage noch einmal und probiere eine andere Taste.</p>
+        `;
+      }
+    }
+
+    function startApply() {
+      applyCurrent = 0;
+      renderApplyTask();
+    }
+
+    function renderApplyTask() {
+      if (applyCurrent >= applyTasks.length) {
+        applyQuestion.textContent = "Geschafft!";
+        practiceArea.value = "";
+        practiceArea.disabled = true;
+        applyFeedback.className = "feedback ok";
+        applyFeedback.innerHTML = `
+          <h2>Alle Aufgaben geschafft!</h2>
+          <p>Du hast Leertaste, Enter, Rücktaste und Shift nicht nur erkannt, sondern auch benutzt.</p>
+        `;
+        applyNextButton.disabled = true;
+        applyResetButton.disabled = true;
+        applyProgress.textContent = `4 von 4 Aufgaben erledigt`;
+        applyNumber.textContent = "✓";
+        return;
+      }
+
+      const task = applyTasks[applyCurrent];
+      applyDone = false;
+      backspaceCount = 0;
+      applyNumber.textContent = String(applyCurrent + 1);
+      applyQuestion.textContent = task.question;
+      practiceArea.disabled = false;
+      practiceArea.value = task.startText;
+      applyFeedback.className = "feedback";
+      applyFeedback.innerHTML = `
+        <h2>Probiere es selbst.</h2>
+        <p>Die Schreibmarke steht schon an der richtigen Stelle.</p>
+      `;
+      applyNextButton.disabled = true;
+      applyResetButton.disabled = false;
+      applyProgress.textContent = `Aufgabe ${applyCurrent + 1} von ${applyTasks.length}`;
+
+      requestAnimationFrame(() => {
+        practiceArea.focus();
+        practiceArea.setSelectionRange(task.caret, task.caret);
+      });
+    }
+
+    function completeApplyTask() {
+      if (applyDone) return;
+      applyDone = true;
+      const task = applyTasks[applyCurrent];
+      applyFeedback.className = "feedback ok";
+      applyFeedback.innerHTML = `
+        <h2>✓ Richtig!</h2>
+        <p>${task.successText}</p>
+      `;
+      applyNextButton.disabled = false;
+    }
+
+    function checkApplyKey(event) {
+      if (mode !== "apply" || applyDone || applyCurrent >= applyTasks.length) return;
+
+      const task = applyTasks[applyCurrent];
+
+      if (task.expected === "space") {
+        if (event.code === "Space") {
+          setTimeout(() => {
+            if (practiceArea.value.includes("Hallo Welt")) completeApplyTask();
+          }, 0);
+        }
+      }
+
+      if (task.expected === "enter") {
+        if (event.key === "Enter") {
+          setTimeout(() => {
+            if (practiceArea.value.includes("Hallo\nWelt")) completeApplyTask();
+          }, 0);
+        }
+      }
+
+      if (task.expected === "deleteWord") {
+        if (event.key === "Backspace") {
+          backspaceCount++;
+          setTimeout(() => {
+            const clean = practiceArea.value.trimEnd();
+            if (clean === "Mein Ball ist") completeApplyTask();
+          }, 0);
+        } else if (event.key.length === 1 || event.key === "Enter") {
+          event.preventDefault();
+          applyFeedback.className = "feedback warn";
+          applyFeedback.innerHTML = `
+            <h2>Nutze die Rücktaste.</h2>
+            <p>Lösche das Wort „rot“ Zeichen für Zeichen nach links.</p>
+          `;
+        }
+      }
+
+      if (task.expected === "uppercaseA") {
+        if (event.key === "A" && event.shiftKey) {
+          setTimeout(() => {
+            if (practiceArea.value === "A") completeApplyTask();
+          }, 0);
+        } else if (event.key.length === 1 && event.key !== "Shift") {
+          setTimeout(() => {
+            if (practiceArea.value !== "A") {
+              applyFeedback.className = "feedback warn";
+              applyFeedback.innerHTML = `
+                <h2>Noch nicht.</h2>
+                <p>Halte <strong>Shift</strong> gedrückt und drücke gleichzeitig <strong>A</strong>.</p>
+              `;
+              practiceArea.value = "";
+              practiceArea.focus();
+            }
+          }, 0);
+        }
+      }
+    }
+
+    discoverTab.addEventListener("click", () => setMode("discover"));
+    quizTab.addEventListener("click", () => setMode("quiz"));
+    applyTab.addEventListener("click", () => setMode("apply"));
+
+    nextButton.addEventListener("click", () => {
+      current++;
+      renderQuestion();
+    });
+
+    resetButton.addEventListener("click", startQuiz);
+
+    applyNextButton.addEventListener("click", () => {
+      applyCurrent++;
+      renderApplyTask();
+    });
+
+    applyResetButton.addEventListener("click", renderApplyTask);
+
+    practiceArea.addEventListener("keydown", checkApplyKey);
+
+    document.addEventListener("keydown", event => {
+      const code = normalizeCode(event);
+      if (code) flashKeyboard(code);
+
+      if (mode === "apply") return;
+      if (!code) return;
+
+      event.preventDefault();
+      if (event.repeat) return;
+
+      if (mode === "discover") {
+        showDiscovery(code);
+      } else if (mode === "quiz") {
+        checkAnswer(code);
+      }
+    });
+  </script>
+</body>
+</html>
